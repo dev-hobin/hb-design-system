@@ -3,12 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "peerDependencies": {
-    "react": ">=16.8.0",
-    "react-dom": ">=16.8.0"
-  },
   "dependencies": {
-    "@hb-design-systems/primitives": "^1.0.0"
+    "@hb-design-systems/primitives": "^1.0.0",
+    "styled-components": "^5.3.6"
   },
   "devDependencies": {
     "@babel/core": "^7.21.0",
@@ -20,11 +17,16 @@
     "@storybook/manager-webpack5": "^6.5.16",
     "@storybook/react": "^6.5.16",
     "@storybook/testing-library": "^0.0.13",
+    "@types/styled-components": "^5.1.26",
     "babel-loader": "^8.3.0",
+    "babel-plugin-styled-components": "^2.0.7",
     "tsconfig-paths-webpack-plugin": "^4.0.0"
   },
   "scripts": {
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
+  },
+  "resolutions": {
+    "styled-components": "^5"
   }
 }

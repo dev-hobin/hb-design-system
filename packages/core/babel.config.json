@@ -1,3 +1,13 @@
 {
-  "extends": "../../babel.config.json"
+  "extends": "../../babel.config.json",
+  "plugins": [
+    [
+      "babel-plugin-styled-components",
+      {
+        "ssr": true,
+        "displayName": true,
+        "fileName": true
+      }
+    ]
+  ]
 }

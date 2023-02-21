@@ -1,3 +1,14 @@
+import { createGlobalStyle } from "styled-components";
+
+const GlobalStyle = createGlobalStyle``;
+
+const withGlobalStyle = (Story) => (
+  <>
+    <GlobalStyle />
+    <Story />
+  </>
+);
+
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
   controls: {
@@ -6,4 +17,6 @@ export const parameters = {
       date: /Date$/,
     },
   },
-}
+};
+
+export const decorators = [withGlobalStyle];
