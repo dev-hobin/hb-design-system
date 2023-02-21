@@ -1,12 +1,5 @@
-import { useEffect, useState } from "react";
+import React from "react";
 
 export const Empty = () => {
-  const [a, setA] = useState<boolean>(false);
-  useEffect(() => {
-    console.log(setA);
-    if (a) {
-      console.log("ho");
-    }
-  }, []);
-  return null;
+  return <div>테스트</div>;
 };

@@ -1,10 +1,13 @@
 {
-  "name": "@hb-design-systems/primitives",
+  "name": "@hb-design-systems/core",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "peerDependencies": {
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "@hb-design-systems/primitives": "^1.0.0"
   }
 }

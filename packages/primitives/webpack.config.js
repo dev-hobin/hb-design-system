@@ -1,5 +1,4 @@
-const path = require("path");
-require("../../babel.config.json");
+import path from "path";
 
 module.exports = {
   mode: "development",
