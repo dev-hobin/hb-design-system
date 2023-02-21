@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.json",
   "include": ["./src"],
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
       "@hb-design-systems/primitives": ["../primitives/src"]
     }
