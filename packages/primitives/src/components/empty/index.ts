@@ -1,1 +1,1 @@
-import { Empty } from "./Empty";
+export * from "./Empty";
