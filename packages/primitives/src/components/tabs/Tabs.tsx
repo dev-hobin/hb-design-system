@@ -113,6 +113,12 @@ const List = forwardRef<ListElement, ListProps>((props, forwardedRef) => {
                 allTabs[currTabIndex - 1]?.focus();
               }
               break;
+            case Keys.Home:
+              allTabs[0]?.focus();
+              break;
+            case Keys.End:
+              allTabs[lastIndex]?.focus();
+              break;
             default:
               break;
           }
