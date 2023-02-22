@@ -17,18 +17,14 @@
     "@storybook/manager-webpack4": "^6.5.16",
     "@storybook/react": "^6.5.16",
     "@storybook/testing-library": "^0.0.13",
-    "@types/styled-components": "^5.1.26",
     "babel-loader": "^8.3.0"
-  },
-  "dependencies": {
-    "styled-components": "^5.3.6"
   },
   "scripts": {
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "test": "jest"
   },
-  "resolutions": {
-    "styled-components": "^5"
+  "dependencies": {
+    "@stitches/react": "^1.2.8"
   }
 }
