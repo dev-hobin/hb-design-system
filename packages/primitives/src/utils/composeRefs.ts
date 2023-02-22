@@ -1,12 +1,12 @@
 import React from "react";
 
-type RefOrUndefined<Value> =
+export type RefOrInvalid<Value> =
   | ((instance: Value | null) => void)
-  | React.MutableRefObject<Value>
+  | React.MutableRefObject<Value | null>
   | undefined
   | null;
 
-const setRef = <Value>(ref: RefOrUndefined<Value>, value: Value) => {
+const setRef = <Value>(ref: RefOrInvalid<Value>, value: Value) => {
   if (typeof ref === "function") {
     ref(value);
   } else if (ref) {
@@ -14,6 +14,6 @@ const setRef = <Value>(ref: RefOrUndefined<Value>, value: Value) => {
   }
 };
 
-export const composeRefs = <Value>(...refs: RefOrUndefined<Value>[]) => {
+export const composeRefs = <Value>(...refs: RefOrInvalid<Value>[]) => {
   return (instance: Value) => refs.forEach((ref) => setRef(ref, instance));
 };
