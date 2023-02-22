@@ -1,13 +1,22 @@
-import React, { createContext, ElementRef, forwardRef, useId, useMemo, useState } from "react";
+import React, {
+  createContext,
+  ElementRef,
+  forwardRef,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from "react";
 import { useCallbackRef } from "../../hooks/useCallbackRef";
+import useComposedRef from "../../hooks/useComposedRef";
 import { useContollableState } from "../../hooks/useContollableState";
 import { useStrictContext } from "../../hooks/useStrictContext";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
+import { Keys } from "../../utils/keyboard";
 import { Primitive, PrimitivePropsWithoutRef } from "../primitive";
 
 type PrimitiveDivProps = PrimitivePropsWithoutRef<typeof Primitive.div>;
-type PrimitiveUlProps = PrimitivePropsWithoutRef<typeof Primitive.ul>;
-type PrimitiveLiProps = PrimitivePropsWithoutRef<typeof Primitive.li>;
+type PrimitiveButtonProps = PrimitivePropsWithoutRef<typeof Primitive.button>;
 
 type RootContextValue = {
   orientation: "horizontal" | "vertical";
@@ -54,13 +63,70 @@ const Root = forwardRef<RootElement, RootProps>((props, ref) => {
 });
 Root.displayName = "Tabs";
 
-type ListElement = ElementRef<typeof Primitive.ul>;
-type ListProps = PrimitiveUlProps;
-const List = forwardRef<ListElement, ListProps>((props, ref) => {
+type ListElement = ElementRef<typeof Primitive.div>;
+type ListProps = PrimitiveDivProps;
+const List = forwardRef<ListElement, ListProps>((props, forwardedRef) => {
   const { orientation } = useStrictContext(RootContext);
+  const [container, setContainer] = useState<ListElement | null>(null);
+
+  const composedRef = useComposedRef(forwardedRef, (node) => setContainer(node));
+
+  useEffect(() => {
+    if (container) {
+      const keyboardEventHandler = (ev: KeyboardEvent) => {
+        const activeElement = document.activeElement;
+        if (container.contains(activeElement)) {
+          const allTabs = Array.from(container.querySelectorAll('[role="tab"]')) as HTMLElement[];
+          const currTabIndex = allTabs.indexOf(activeElement as HTMLElement);
+          if (currTabIndex < 0) return;
+          const lastIndex = allTabs.length - 1;
+          switch (ev.code) {
+            case Keys.ArrowRight:
+              if (orientation !== "horizontal") break;
+              if (currTabIndex === lastIndex) {
+                allTabs[0]?.focus();
+              } else {
+                allTabs[currTabIndex + 1]?.focus();
+              }
+              break;
+            case Keys.ArrowLeft:
+              if (orientation !== "horizontal") break;
+              if (currTabIndex === 0) {
+                allTabs[lastIndex]?.focus();
+              } else {
+                allTabs[currTabIndex - 1]?.focus();
+              }
+              break;
+            case Keys.ArrowDown:
+              if (orientation !== "vertical") break;
+              if (currTabIndex === lastIndex) {
+                allTabs[0]?.focus();
+              } else {
+                allTabs[currTabIndex + 1]?.focus();
+              }
+              break;
+            case Keys.ArrowUp:
+              if (orientation !== "vertical") break;
+              if (currTabIndex === 0) {
+                allTabs[lastIndex]?.focus();
+              } else {
+                allTabs[currTabIndex - 1]?.focus();
+              }
+              break;
+            default:
+              break;
+          }
+        }
+      };
+      container.addEventListener("keydown", keyboardEventHandler);
+
+      return () => container.removeEventListener("keydown", keyboardEventHandler);
+    }
+  }, [container, orientation]);
+
   return (
-    <Primitive.ul
-      ref={ref}
+    <Primitive.div
+      ref={composedRef}
       role="tablist"
       aria-orientation={orientation}
       data-orientation={orientation}
@@ -70,15 +136,21 @@ const List = forwardRef<ListElement, ListProps>((props, ref) => {
 });
 List.displayName = "Tabs.List";
 
-type TabElement = ElementRef<typeof Primitive.li>;
-interface TabProps extends PrimitiveLiProps {
+type TabElement = ElementRef<typeof Primitive.button>;
+interface TabProps extends PrimitiveButtonProps {
   value: string;
   disabled?: boolean;
   onClick?: (e: React.MouseEvent) => void;
 }
 const Tab = forwardRef<TabElement, TabProps>((props, ref) => {
-  const { value, disabled = false, onClick, ...rest } = props;
-  const { baseId, value: currentValue, orientation, onValueChange } = useStrictContext(RootContext);
+  const { value, disabled = false, onClick, onFocus, ...rest } = props;
+  const {
+    baseId,
+    value: currentValue,
+    orientation,
+    activation,
+    onValueChange,
+  } = useStrictContext(RootContext);
   const internalId = "tabs" + baseId + "tab" + value;
   const panelId = "tabs" + baseId + "content" + value;
 
@@ -86,17 +158,29 @@ const Tab = forwardRef<TabElement, TabProps>((props, ref) => {
     composePreventableEventHandlers(onClick, () => onValueChange(value))
   );
 
+  const handleFocus = useCallbackRef(
+    composePreventableEventHandlers(onFocus, () => {
+      if (activation === "automatic") {
+        onValueChange(value);
+      }
+    })
+  );
+
+  const isActive = value === currentValue;
+
   return (
-    <Primitive.li
+    <Primitive.button
       ref={ref}
       id={internalId}
       role="tab"
       aria-controls={panelId}
-      aria-selected={value === currentValue}
+      aria-selected={isActive}
       data-orientation={orientation}
-      data-state={value === currentValue ? "active" : "inactive"}
+      data-state={isActive ? "active" : "inactive"}
       data-disabled={disabled}
+      tabIndex={isActive ? 0 : -1}
       onClick={handleClick}
+      onFocus={handleFocus}
       {...rest}
     />
   );
@@ -124,6 +208,7 @@ const Panel = forwardRef<PanelElement, PanelProps>((props, ref) => {
       role="tabpanel"
       aria-labelledby={tabId}
       data-orientation={orientation}
+      tabIndex={isActive ? 0 : -1}
       data-state={isActive ? "active" : "inactive"}
       {...rest}
     />
