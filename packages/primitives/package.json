@@ -4,8 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "peerDependencies": {
-    "react": "^16.8 || ^17.0 || ^18.0",
-    "react-dom": "^16.8 || ^17.0 || ^18.0"
+    "react": "^18.0",
+    "react-dom": "^18.0"
   },
   "devDependencies": {
     "@babel/core": "^7.21.0",
