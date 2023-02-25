@@ -18,8 +18,8 @@ import { useStrictContext } from "../../hooks/useStrictContext";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
 import { Keys } from "../../utils/keyboard";
 import { sortByDomNode } from "../../utils/sortByDomNode";
-import { focusable } from "../../utils/focusable";
 import { Primitive, PrimitivePropsWithoutRef } from "../primitive";
+import { usePreviousValue } from "../../hooks/usePreviousValue";
 
 type PrimitiveDivProps = PrimitivePropsWithoutRef<typeof Primitive.div>;
 type PrimitiveButtonProps = PrimitivePropsWithoutRef<typeof Primitive.button>;
@@ -67,9 +67,9 @@ type DataContextValue = {
   items: Item[];
   firstOption: Item | undefined;
   hasCheckedItem: boolean;
-  // onValueChange: (value: string) => void;
   disabled: boolean;
   required: boolean;
+  formControlled: boolean;
   name: string | undefined;
 };
 const DataContext = createContext<DataContextValue | null>(null);
@@ -116,7 +116,11 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
 
   const [value = "", setValue] = useContollableState(theirValue, theirHandler, defaultValue);
   const internalRef = useRef<HTMLDivElement | null>(null);
-  const composedRef = useComposedRef(forwardedRef, internalRef);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const composedRef = useComposedRef(forwardedRef, internalRef, (node) => {
+    formRef.current = node?.closest("form") ?? null;
+  });
+  const isFormControlled = !!formRef.current;
 
   const items = state.items;
   const firstOption = useMemo(() => {
@@ -155,8 +159,9 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
       items: state.items,
       required,
       name,
+      formControlled: isFormControlled,
     }),
-    [disabled, firstOption, hasCheckedItem, name, required, state.items, value]
+    [disabled, firstOption, hasCheckedItem, name, required, state.items, value, isFormControlled]
   );
 
   const radioGroupAction = useMemo(
@@ -170,20 +175,23 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
       if (!container) return;
 
       const document = globalThis.document;
+      const allRadios = items
+        .filter((item) => item.propsRef.current.disabled === false)
+        .map((item) => item.element.current) as HTMLElement[];
+      const activeElement = document.activeElement as HTMLElement;
+
+      if (!allRadios.includes(activeElement)) return;
 
       switch (ev.key) {
         case Keys.ArrowLeft:
         case Keys.ArrowUp: {
           ev.preventDefault();
           ev.stopPropagation();
-          const focusableElements = focusable(container, false);
-          if (focusableElements.length === 0) return;
 
-          const currentFocusedElement = document.activeElement as HTMLElement;
-          const idx = focusableElements.indexOf(currentFocusedElement);
+          const idx = allRadios.indexOf(activeElement);
           if (idx === -1) return;
 
-          const lastFocusableElement = focusableElements[focusableElements.length - 1];
+          const lastFocusableElement = allRadios[allRadios.length - 1];
           if (idx === 0) {
             lastFocusableElement.focus();
             const focusedItem = items.find((item) => item.element.current === lastFocusableElement);
@@ -191,7 +199,7 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
               triggerChange(focusedItem.propsRef.current.value);
             }
           } else {
-            const focusedElement = focusableElements[idx - 1];
+            const focusedElement = allRadios[idx - 1];
             focusedElement.focus();
 
             const focusedItem = items.find((item) => item.element.current === focusedElement);
@@ -205,15 +213,12 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
         case Keys.ArrowDown: {
           ev.preventDefault();
           ev.stopPropagation();
-          const focusableElements = focusable(container, false);
-          if (focusableElements.length === 0) return;
 
-          const currentFocusedElement = document.activeElement as HTMLElement;
-          const idx = focusableElements.indexOf(currentFocusedElement);
+          const idx = allRadios.indexOf(activeElement);
           if (idx === -1) return;
 
-          const firstFocusableElement = focusableElements[0];
-          if (idx === focusableElements.length - 1) {
+          const firstFocusableElement = allRadios[0];
+          if (idx === allRadios.length - 1) {
             firstFocusableElement.focus();
             const focusedItem = items.find(
               (item) => item.element.current === firstFocusableElement
@@ -222,7 +227,7 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
               triggerChange(focusedItem.propsRef.current.value);
             }
           } else {
-            const focusedElement = focusableElements[idx + 1];
+            const focusedElement = allRadios[idx + 1];
             focusedElement.focus();
 
             const focusedItem = items.find((item) => item.element.current === focusedElement);
@@ -236,7 +241,7 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
           ev.preventDefault();
           ev.stopPropagation();
 
-          const currentFocusedElement = document.activeElement as HTMLElement;
+          const currentFocusedElement = activeElement as HTMLElement;
           const currentFocusedItem = items.find(
             (item) => item.element.current === currentFocusedElement
           );
@@ -280,17 +285,20 @@ interface ItemProps extends PrimitiveButtonProps {
 }
 const Item = forwardRef<ItemElement, ItemProps>((props, forwardedRef) => {
   const internalId = useId();
-  const { id = internalId, value, disabled = false, onClick, onFocus, ...rest } = props;
+  const { id = internalId, value, disabled = false, onClick, ...rest } = props;
   const radioGroupData = useStrictContext(DataContext);
   const radioGroupAction = useStrictContext(ActionContext);
 
   const internalRef = useRef<HTMLButtonElement | null>(null);
   const composedRef = useComposedRef(forwardedRef, internalRef);
   const propsRef = useLatestValue({ value, disabled });
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const isFirstOption = radioGroupData.firstOption?.id === id;
   const isDisabled = radioGroupData.disabled || disabled;
   const isChecked = radioGroupData.value === value;
+  const isFormControlled = radioGroupData.formControlled;
+  const previousChecked = usePreviousValue(isChecked);
 
   const getTabIndex = () => {
     if (isDisabled) return -1;
@@ -310,6 +318,20 @@ const Item = forwardRef<ItemElement, ItemProps>((props, forwardedRef) => {
       internalRef.current?.focus();
     })
   );
+
+  useEffect(() => {
+    if (isFormControlled && inputRef.current) {
+      const input = inputRef.current;
+      const inputPrototype = globalThis.HTMLInputElement.prototype;
+      const descriptor = Object.getOwnPropertyDescriptor(inputPrototype, "checked");
+      const setter = descriptor?.set;
+      if (setter && previousChecked !== isChecked) {
+        const event = new Event("click", { bubbles: true });
+        setter.call(input, isChecked);
+        input.dispatchEvent(event);
+      }
+    }
+  }, [inputRef, isFormControlled, isChecked, previousChecked]);
 
   const itemContextValue = useMemo(
     () => ({
@@ -338,28 +360,28 @@ const Item = forwardRef<ItemElement, ItemProps>((props, forwardedRef) => {
           {...rest}
         />
       </ItemContext.Provider>
-      {/* {isFormControlled && (
+      {isFormControlled && (
         <input
           ref={inputRef}
           type="radio"
           tabIndex={-1}
           disabled={!!disabled}
-          required={rootContext.required}
+          required={radioGroupData.required}
           aria-hidden="true"
-          name={rootContext.name}
+          name={radioGroupData.name}
           value={value}
           defaultChecked={!!isChecked}
           style={{
             position: "absolute",
             opacity: 0,
             pointerEvents: "none",
-            width: 1,
-            height: 1,
+            width: 0,
+            height: 0,
             padding: 0,
             margin: 0,
           }}
         />
-      )} */}
+      )}
     </>
   );
 });

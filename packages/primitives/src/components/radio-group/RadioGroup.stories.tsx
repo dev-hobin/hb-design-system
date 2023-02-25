@@ -13,7 +13,7 @@ export const Default = () => {
         }}
         onSubmit={(e) => e.preventDefault()}
       >
-        <RadioGroup required name="required" defaultValue="radio-3">
+        <RadioGroup required name="required">
           <RadioGroup.Item value={"radio-1"} disabled>
             라디오 - 1
           </RadioGroup.Item>
