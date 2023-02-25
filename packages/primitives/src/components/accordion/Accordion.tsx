@@ -6,7 +6,7 @@ import { composePreventableEventHandlers } from "../../utils/composeEventHandler
 import { Primitive, PrimitivePropsWithoutRef } from "../primitive";
 
 type PrimitiveDivProps = PrimitivePropsWithoutRef<typeof Primitive.div>;
-type PrimitiveH2Props = PrimitivePropsWithoutRef<typeof Primitive.h2>;
+type PrimitiveH3Props = PrimitivePropsWithoutRef<typeof Primitive.h3>;
 type PrimitiveButtonProps = PrimitivePropsWithoutRef<typeof Primitive.button>;
 
 //
@@ -183,7 +183,7 @@ const Item = forwardRef<ItemElement, ItemProps>((props, forwardedRef) => {
 Item.displayName = "Accordion.Item";
 
 type HeaderElement = ElementRef<typeof Primitive.h2>;
-type HeaderProps = PrimitiveH2Props;
+type HeaderProps = PrimitiveH3Props;
 const Header = forwardRef<HeaderElement, HeaderProps>((props, forwardedRef) => {
   const itemContext = useStrictContext(ItemContext);
 
@@ -191,7 +191,7 @@ const Header = forwardRef<HeaderElement, HeaderProps>((props, forwardedRef) => {
   const isDisabled = itemContext.disabled;
 
   return (
-    <Primitive.h2
+    <Primitive.h3
       ref={forwardedRef}
       data-state={isOpen ? "open" : "closed"}
       data-disabled={isDisabled}

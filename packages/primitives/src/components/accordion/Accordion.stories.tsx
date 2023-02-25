@@ -5,7 +5,7 @@ export default { title: "Component/Accordion" };
 
 export const Default = () => {
   return (
-    <Accordion type="single" disabled defaultValue={"accordion-1"}>
+    <Accordion type="single" defaultValue={"accordion-2"}>
       <Accordion.Item value="accordion-1">
         <Accordion.Header>
           <Accordion.Trigger>FAQ 1</Accordion.Trigger>
