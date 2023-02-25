@@ -9,12 +9,14 @@ export const Default = () => {
       <button type="button">버튼</button>
       <form
         onChange={(e) => {
-          e.preventDefault();
           console.log(e);
         }}
+        onSubmit={(e) => e.preventDefault()}
       >
-        <RadioGroup required name="required">
-          <RadioGroup.Item value={"radio-1"}>라디오 - 1</RadioGroup.Item>
+        <RadioGroup required name="required" defaultValue="radio-3">
+          <RadioGroup.Item value={"radio-1"} disabled>
+            라디오 - 1
+          </RadioGroup.Item>
           <RadioGroup.Item value={"radio-2"}>라디오 - 2</RadioGroup.Item>
           <RadioGroup.Item value={"radio-3"}>라디오 - 3</RadioGroup.Item>
         </RadioGroup>
