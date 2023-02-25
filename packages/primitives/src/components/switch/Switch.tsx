@@ -2,6 +2,7 @@ import React, { ElementRef, forwardRef, useEffect, useRef, useState } from "reac
 import { useCallbackRef } from "../../hooks/useCallbackRef";
 import useComposedRef from "../../hooks/useComposedRef";
 import { useContollableState } from "../../hooks/useContollableState";
+import { useIsFormControlled } from "../../hooks/useIsFormControlled";
 import { usePreviousValue } from "../../hooks/usePreviousValue";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
 import { Primitive, PrimitivePropsWithoutRef } from "../primitive";
@@ -37,24 +38,14 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
     defaultChecked
   );
   const previousChecked = usePreviousValue(checked);
-  const [isFormControlled, setIsFormControlled] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const composedRef = useComposedRef(forwardedRef, (node) => setContainer(node));
-
+  const isFormControlled = useIsFormControlled(container);
   const handleClick = useCallbackRef(
-    composePreventableEventHandlers(onClick, (e) => {
+    composePreventableEventHandlers(onClick, () => {
       setChecked(!checked);
     })
   );
-
-  useEffect(() => {
-    if (container) {
-      const form = container.closest("form");
-      if (form) {
-        setIsFormControlled(true);
-      }
-    }
-  }, [container]);
 
   useEffect(() => {
     if (isFormControlled && inputRef.current) {

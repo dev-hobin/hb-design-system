@@ -1,7 +1,17 @@
-import React, { createContext, ElementRef, forwardRef, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  ElementRef,
+  forwardRef,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useCallbackRef } from "../../hooks/useCallbackRef";
 import useComposedRef from "../../hooks/useComposedRef";
 import { useContollableState } from "../../hooks/useContollableState";
+import { useIsFormControlled } from "../../hooks/useIsFormControlled";
+import { usePreviousValue } from "../../hooks/usePreviousValue";
 import { useStrictContext } from "../../hooks/useStrictContext";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
 import { Keys } from "../../utils/keyboard";
@@ -15,6 +25,8 @@ type RootContextValue = {
   value: string;
   onValueChange: (value: string) => void;
   disabled: boolean;
+  required: boolean;
+  name: string | undefined;
 };
 const RootContext = createContext<RootContextValue | null>(null);
 RootContext.displayName = "RadioGroup.RootContext";
@@ -25,6 +37,8 @@ interface RootProps extends PrimitiveDivProps {
   onValueChange?: (value: string) => void;
   disabled?: boolean;
   defaultValue?: string;
+  required?: boolean;
+  name?: string;
 }
 const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
   const {
@@ -32,6 +46,8 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
     onValueChange: theirHandler,
     defaultValue,
     disabled = false,
+    required = false,
+    name,
     ...rest
   } = props;
   const [value = "", setValue] = useContollableState(theirValue, theirHandler, defaultValue);
@@ -103,8 +119,8 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
   }, [container, value]);
 
   const contextValue = useMemo(
-    () => ({ value, onValueChange: setValue, disabled }),
-    [disabled, setValue, value]
+    () => ({ value, onValueChange: setValue, disabled, required, name }),
+    [disabled, setValue, value, required, name]
   );
 
   return (
@@ -127,15 +143,37 @@ interface ItemProps extends PrimitiveButtonProps {
   disabled?: boolean;
 }
 const Item = forwardRef<ItemElement, ItemProps>((props, forwardedRef) => {
-  const { value, disabled = false, onClick, ...rest } = props;
+  const { value, disabled = false, onClick, onFocus, ...rest } = props;
   const rootContext = useStrictContext(RootContext);
+  const [container, setContainer] = useState<HTMLButtonElement | null>(null);
+  const composedRef = useComposedRef(forwardedRef, (node) => setContainer(node));
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const isChecked = rootContext.value === value;
+  const previousChecked = usePreviousValue(isChecked);
   const isDisabled = rootContext.disabled || disabled;
+  const isFormControlled = useIsFormControlled(container);
 
   const handleClick = useCallbackRef(
     composePreventableEventHandlers(onClick, () => rootContext.onValueChange(value))
   );
+  const handleFocus = useCallbackRef(
+    composePreventableEventHandlers(onFocus, () => rootContext.onValueChange(value))
+  );
+
+  useEffect(() => {
+    if (isFormControlled && inputRef.current) {
+      const input = inputRef.current;
+      const inputPrototype = globalThis.HTMLInputElement.prototype;
+      const descriptor = Object.getOwnPropertyDescriptor(inputPrototype, "checked");
+      const setter = descriptor?.set;
+      if (setter && previousChecked !== isChecked) {
+        const event = new Event("click", { bubbles: true });
+        setter.call(input, isChecked);
+        input.dispatchEvent(event);
+      }
+    }
+  }, [inputRef, isFormControlled, isChecked, previousChecked]);
 
   const contextValue = useMemo(
     () => ({
@@ -149,7 +187,7 @@ const Item = forwardRef<ItemElement, ItemProps>((props, forwardedRef) => {
   return (
     <ItemContext.Provider value={contextValue}>
       <Primitive.button
-        ref={forwardedRef}
+        ref={composedRef}
         type="button"
         role="radio"
         value={value}
@@ -159,8 +197,31 @@ const Item = forwardRef<ItemElement, ItemProps>((props, forwardedRef) => {
         data-state={isChecked ? "checked" : "unchecked"}
         data-disabled={isDisabled}
         onClick={handleClick}
+        onFocus={handleFocus}
         {...rest}
       />
+      {isFormControlled && (
+        <input
+          ref={inputRef}
+          type="radio"
+          tabIndex={-1}
+          disabled={!!disabled}
+          required={rootContext.required}
+          aria-hidden="true"
+          name={rootContext.name}
+          value={value}
+          defaultChecked={!!isChecked}
+          style={{
+            position: "absolute",
+            opacity: 0,
+            pointerEvents: "none",
+            width: 1,
+            height: 1,
+            padding: 0,
+            margin: 0,
+          }}
+        />
+      )}
     </ItemContext.Provider>
   );
 });
