@@ -1,8 +1,10 @@
-import React, { createContext, ElementRef, forwardRef, useMemo } from "react";
+import React, { createContext, ElementRef, forwardRef, useEffect, useMemo, useState } from "react";
 import { useCallbackRef } from "../../hooks/useCallbackRef";
+import useComposedRef from "../../hooks/useComposedRef";
 import { useContollableState } from "../../hooks/useContollableState";
 import { useStrictContext } from "../../hooks/useStrictContext";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
+import { Keys } from "../../utils/keyboard";
 import { Primitive, PrimitivePropsWithoutRef } from "../primitive";
 
 type PrimitiveDivProps = PrimitivePropsWithoutRef<typeof Primitive.div>;
@@ -33,6 +35,72 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
     ...rest
   } = props;
   const [value = "", setValue] = useContollableState(theirValue, theirHandler, defaultValue);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const composedRef = useComposedRef(forwardedRef, (node) => setContainer(node));
+
+  useEffect(() => {
+    if (container) {
+      const getAllRadios = () => container.querySelectorAll('[role="radio"]');
+      const focusHandler = () => {
+        console.log("con");
+        const allRadios = Array.from(getAllRadios()) as HTMLButtonElement[];
+        const currentCheckedRadio = allRadios.find((btn) => btn.value === value);
+        if (currentCheckedRadio) currentCheckedRadio.focus();
+        else allRadios[0].focus();
+      };
+      const keyboardEventHandler = (ev: KeyboardEvent) => {
+        const activeElement = document.activeElement;
+        if (container.contains(activeElement)) {
+          const allRadios = Array.from(getAllRadios()) as HTMLElement[];
+          console.log("allRadios", allRadios);
+          const currRadioIndex = allRadios.indexOf(activeElement as HTMLElement);
+          console.log("currRadioIndex", currRadioIndex);
+          if (currRadioIndex < 0) return;
+          const lastIndex = allRadios.length - 1;
+          switch (ev.code) {
+            case Keys.ArrowRight:
+              if (currRadioIndex === lastIndex) {
+                allRadios[0]?.focus();
+              } else {
+                allRadios[currRadioIndex + 1]?.focus();
+              }
+              break;
+            case Keys.ArrowLeft:
+              if (currRadioIndex === 0) {
+                allRadios[lastIndex]?.focus();
+              } else {
+                allRadios[currRadioIndex - 1]?.focus();
+              }
+              break;
+            case Keys.ArrowDown:
+              if (currRadioIndex === lastIndex) {
+                allRadios[0]?.focus();
+              } else {
+                allRadios[currRadioIndex + 1]?.focus();
+              }
+              break;
+            case Keys.ArrowUp:
+              if (currRadioIndex === 0) {
+                allRadios[lastIndex]?.focus();
+              } else {
+                allRadios[currRadioIndex - 1]?.focus();
+              }
+              break;
+            default:
+              break;
+          }
+        }
+      };
+
+      container.addEventListener("focus", focusHandler);
+      container.addEventListener("keydown", keyboardEventHandler);
+
+      return () => {
+        container.removeEventListener("focus", focusHandler);
+        container.removeEventListener("keydown", keyboardEventHandler);
+      };
+    }
+  }, [container, value]);
 
   const contextValue = useMemo(
     () => ({ value, onValueChange: setValue, disabled }),
@@ -41,7 +109,7 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
 
   return (
     <RootContext.Provider value={contextValue}>
-      <Primitive.div ref={forwardedRef} role="radiogroup" tabIndex={disabled ? -1 : 0} {...rest} />
+      <Primitive.div ref={composedRef} role="radiogroup" tabIndex={disabled ? -1 : 0} {...rest} />
     </RootContext.Provider>
   );
 });
@@ -82,7 +150,9 @@ const Item = forwardRef<ItemElement, ItemProps>((props, forwardedRef) => {
     <ItemContext.Provider value={contextValue}>
       <Primitive.button
         ref={forwardedRef}
+        type="button"
         role="radio"
+        value={value}
         disabled={isDisabled}
         tabIndex={isChecked ? 0 : -1}
         aria-checked={isChecked}
