@@ -3,14 +3,19 @@ import React, {
   ElementRef,
   forwardRef,
   ReactNode,
+  useContext,
   useEffect,
   useId,
   useMemo,
   useState,
 } from "react";
+import { useCallbackRef } from "../../hooks/useCallbackRef";
 import useComposedRef from "../../hooks/useComposedRef";
 import { useControllableState } from "../../hooks/useControllableState";
+import { useOutsideClick } from "../../hooks/useOutsideClick";
+import { useScrollLock } from "../../hooks/useScrollLock";
 import { useStrictContext } from "../../hooks/useStrictContext";
+import { StackProvider } from "../../internal/StackProvider";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
 import { Portal } from "../portal";
 import { Primitive, PrimitivePropsWithoutRef } from "../primitive";
@@ -32,6 +37,8 @@ type RootContextValue = {
   descriptionId: string | undefined;
   registerDescription: (id: string) => void;
   unregisterDescription: () => void;
+  hasNestedDialogs: boolean;
+  hasParentDialog: boolean;
 };
 const RootContext = createContext<RootContextValue | null>(null);
 
@@ -51,6 +58,10 @@ const Root = ({
   const [contentId, setContentId] = useState<string>();
   const [titleId, setTitleId] = useState<string>();
   const [descriptionId, setDescriptionId] = useState<string>();
+  const [nestedCount, setNestedCount] = useState<number>(0);
+
+  const hasNestedDialogs = nestedCount > 1;
+  const hasParentDialog = useContext(RootContext) !== null;
 
   const contextValue = useMemo(
     () => ({
@@ -65,11 +76,26 @@ const Root = ({
       unregisterContent: () => setDescriptionId(undefined),
       unregisterTitle: () => setDescriptionId(undefined),
       unregisterDescription: () => setDescriptionId(undefined),
+      hasNestedDialogs,
+      hasParentDialog,
     }),
-    [contentId, descriptionId, open, setOpen, titleId]
+    [open, setOpen, contentId, titleId, descriptionId, hasNestedDialogs, hasParentDialog]
   );
 
-  return <RootContext.Provider value={contextValue}>{children}</RootContext.Provider>;
+  return (
+    <StackProvider
+      enabled={open}
+      onUpdate={useCallbackRef((message) => {
+        if (message === "plus") {
+          setNestedCount((count) => count + 1);
+        } else {
+          setNestedCount((count) => count - 1);
+        }
+      })}
+    >
+      <RootContext.Provider value={contextValue}>{children}</RootContext.Provider>
+    </StackProvider>
+  );
 };
 Root.displayName = "Dialog";
 
@@ -120,8 +146,16 @@ const Content = forwardRef<ContentElement, ContentProps>((props, forwardedRef) =
   const internalId = useId();
   const contentId = id || internalId;
 
-  const { open, registerContent, unregisterContent, titleId, descriptionId } =
-    useStrictContext(RootContext);
+  const {
+    open,
+    registerContent,
+    unregisterContent,
+    titleId,
+    descriptionId,
+    onOpenChange,
+    hasNestedDialogs,
+    hasParentDialog,
+  } = useStrictContext(RootContext);
 
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
 
@@ -133,6 +167,9 @@ const Content = forwardRef<ContentElement, ContentProps>((props, forwardedRef) =
       return () => unregisterContent();
     }
   }, [container, contentId, registerContent, unregisterContent]);
+
+  useOutsideClick([container], () => onOpenChange(false), open && !hasNestedDialogs);
+  useScrollLock(container, !hasParentDialog);
 
   if (!open && !forceMount) return null;
   return (
