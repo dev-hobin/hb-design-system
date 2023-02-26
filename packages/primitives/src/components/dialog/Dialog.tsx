@@ -2,6 +2,7 @@ import React, {
   createContext,
   ElementRef,
   forwardRef,
+  MutableRefObject,
   ReactNode,
   useContext,
   useEffect,
@@ -17,6 +18,7 @@ import { useScrollLock } from "../../hooks/useScrollLock";
 import { useStrictContext } from "../../hooks/useStrictContext";
 import { StackProvider } from "../../internal/StackProvider";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
+import { FocusTrap } from "../focus-trap/FocusTrap";
 import { Portal } from "../portal";
 import { Primitive, PrimitivePropsWithoutRef } from "../primitive";
 
@@ -140,9 +142,11 @@ Overlay.displayName = "Dialog.Overlay";
 type ContentElement = ElementRef<typeof Primitive.div>;
 interface ContentProps extends PrimitiveDivProps {
   forceMount?: boolean;
+  initialFocus?: MutableRefObject<HTMLElement | null>;
+  returnFocus?: MutableRefObject<HTMLElement | null>;
 }
 const Content = forwardRef<ContentElement, ContentProps>((props, forwardedRef) => {
-  const { id, forceMount = false, ...rest } = props;
+  const { id, forceMount = false, initialFocus, returnFocus, ...rest } = props;
   const internalId = useId();
   const contentId = id || internalId;
 
@@ -173,17 +177,19 @@ const Content = forwardRef<ContentElement, ContentProps>((props, forwardedRef) =
 
   if (!open && !forceMount) return null;
   return (
-    <Primitive.div
-      id={contentId}
-      ref={composedRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      aria-describedby={descriptionId}
-      data-state={open ? "open" : "closed"}
-      tabIndex={-1}
-      {...rest}
-    />
+    <FocusTrap asChild enabled={open} loop returnFocus={returnFocus}>
+      <Primitive.div
+        id={contentId}
+        ref={composedRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+        data-state={open ? "open" : "closed"}
+        tabIndex={-1}
+        {...rest}
+      />
+    </FocusTrap>
   );
 });
 Content.displayName = "Dialog.Content";
