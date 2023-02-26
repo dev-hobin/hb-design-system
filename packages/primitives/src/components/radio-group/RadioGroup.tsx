@@ -12,7 +12,7 @@ import React, {
 } from "react";
 import { useCallbackRef } from "../../hooks/useCallbackRef";
 import useComposedRef from "../../hooks/useComposedRef";
-import { useContollableState } from "../../hooks/useControllableState";
+import { useControllableState } from "../../hooks/useControllableState";
 import { useLatestValue } from "../../hooks/useLatestValue";
 import { useStrictContext } from "../../hooks/useStrictContext";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
@@ -114,7 +114,7 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
   } = props;
   const [state, dispatch] = useReducer(radioGroupReducer, { items: [] });
 
-  const [value = "", setValue] = useContollableState(theirValue, theirHandler, defaultValue);
+  const [value = "", setValue] = useControllableState(theirValue, theirHandler, defaultValue);
   const internalRef = useRef<HTMLDivElement | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const composedRef = useComposedRef(forwardedRef, internalRef, (node) => {

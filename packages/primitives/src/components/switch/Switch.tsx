@@ -1,7 +1,7 @@
 import React, { ElementRef, forwardRef, useEffect, useRef, useState } from "react";
 import { useCallbackRef } from "../../hooks/useCallbackRef";
 import useComposedRef from "../../hooks/useComposedRef";
-import { useContollableState } from "../../hooks/useControllableState";
+import { useControllableState } from "../../hooks/useControllableState";
 import { useIsFormControlled } from "../../hooks/useIsFormControlled";
 import { usePreviousValue } from "../../hooks/usePreviousValue";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
@@ -32,7 +32,7 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
     ...rest
   } = props;
   const [container, setContainer] = useState<HTMLButtonElement | null>(null);
-  const [checked, setChecked] = useContollableState(
+  const [checked, setChecked] = useControllableState(
     theirChecked,
     theirCheckedHandler,
     defaultChecked

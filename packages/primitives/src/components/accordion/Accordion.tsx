@@ -1,6 +1,6 @@
 import React, { createContext, ElementRef, forwardRef, useCallback, useId, useMemo } from "react";
 import { useCallbackRef } from "../../hooks/useCallbackRef";
-import { useContollableState } from "../../hooks/useControllableState";
+import { useControllableState } from "../../hooks/useControllableState";
 import { useStrictContext } from "../../hooks/useStrictContext";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
 import { Primitive, PrimitivePropsWithoutRef } from "../primitive";
@@ -85,7 +85,7 @@ const SingleRootImpl = forwardRef<RootElement, SingleRootProps>((props, forwarde
     collapsible = false,
     ...rest
   } = props;
-  const [value, setValue] = useContollableState(theirValue, theirHandler, defaultValue);
+  const [value, setValue] = useControllableState(theirValue, theirHandler, defaultValue);
 
   const handleItemOpen = setValue;
   const handleItemClose = useCallback(() => {
@@ -113,7 +113,7 @@ SingleRootImpl.displayName = "Accordion.Single";
 
 const MultipleRootImpl = forwardRef<RootElement, MultipleRootProps>((props, forwardedRef) => {
   const { value: theirValue, onValueChange: theirHandler, defaultValue, ...rest } = props;
-  const [value = [], setValue] = useContollableState(theirValue, theirHandler, defaultValue);
+  const [value = [], setValue] = useControllableState(theirValue, theirHandler, defaultValue);
 
   const handleItemOpen = useCallback(
     (curr: string) => {

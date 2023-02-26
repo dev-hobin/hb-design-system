@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { useCallbackRef } from "../../hooks/useCallbackRef";
 import useComposedRef from "../../hooks/useComposedRef";
-import { useContollableState } from "../../hooks/useControllableState";
+import { useControllableState } from "../../hooks/useControllableState";
 import { useStrictContext } from "../../hooks/useStrictContext";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
 import { Keys } from "../../utils/keyboard";
@@ -46,7 +46,7 @@ const Root = forwardRef<RootElement, RootProps>((props, ref) => {
     ...restProps
   } = props;
 
-  const [value, setValue] = useContollableState(theirValue, therieValueChange, defaultValue);
+  const [value, setValue] = useControllableState(theirValue, therieValueChange, defaultValue);
 
   const baseId = useId();
 

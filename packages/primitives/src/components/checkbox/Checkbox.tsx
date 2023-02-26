@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { Primitive, PrimitivePropsWithoutRef } from "../primitive";
-import { useContollableState } from "../../hooks/useControllableState";
+import { useControllableState } from "../../hooks/useControllableState";
 import useComposedRef from "../../hooks/useComposedRef";
 import { useStrictContext } from "../../hooks/useStrictContext";
 import { usePreviousValue } from "../../hooks/usePreviousValue";
@@ -57,7 +57,7 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
     ...rest
   } = props;
 
-  const [checked = false, setChecked] = useContollableState(
+  const [checked = false, setChecked] = useControllableState(
     theirChecked,
     theirHandler,
     defaultChecked

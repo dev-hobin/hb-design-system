@@ -4,7 +4,7 @@ import { useCallbackRef } from "./useCallbackRef";
 /**
  * 컴포넌트 내부에서 자체적으로 관리하는 상태에 대한 제어권을 외부에 주기 위해서 사용한다.
  */
-export const useContollableState = <TValue>(
+export const useControllableState = <TValue>(
   value: TValue | undefined,
   onValueChange?: (value: TValue) => void,
   defaultValue?: TValue
