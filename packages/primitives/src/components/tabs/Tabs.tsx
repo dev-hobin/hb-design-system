@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { useCallbackRef } from "../../hooks/useCallbackRef";
 import useComposedRef from "../../hooks/useComposedRef";
-import { useContollableState } from "../../hooks/useContollableState";
+import { useContollableState } from "../../hooks/useControllableState";
 import { useStrictContext } from "../../hooks/useStrictContext";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
 import { Keys } from "../../utils/keyboard";

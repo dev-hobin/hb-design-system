@@ -1,7 +1,7 @@
 import React, { ElementRef, forwardRef, useEffect, useRef, useState } from "react";
 import { useCallbackRef } from "../../hooks/useCallbackRef";
 import useComposedRef from "../../hooks/useComposedRef";
-import { useContollableState } from "../../hooks/useContollableState";
+import { useContollableState } from "../../hooks/useControllableState";
 import { useIsFormControlled } from "../../hooks/useIsFormControlled";
 import { usePreviousValue } from "../../hooks/usePreviousValue";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";

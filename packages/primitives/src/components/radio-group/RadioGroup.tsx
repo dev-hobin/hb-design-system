@@ -12,7 +12,7 @@ import React, {
 } from "react";
 import { useCallbackRef } from "../../hooks/useCallbackRef";
 import useComposedRef from "../../hooks/useComposedRef";
-import { useContollableState } from "../../hooks/useContollableState";
+import { useContollableState } from "../../hooks/useControllableState";
 import { useLatestValue } from "../../hooks/useLatestValue";
 import { useStrictContext } from "../../hooks/useStrictContext";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
@@ -23,7 +23,7 @@ import { usePreviousValue } from "../../hooks/usePreviousValue";
 
 type PrimitiveDivProps = PrimitivePropsWithoutRef<typeof Primitive.div>;
 type PrimitiveButtonProps = PrimitivePropsWithoutRef<typeof Primitive.button>;
-type PrimitiveSpanProps = PrimitivePropsWithoutRef<typeof Primitive.button>;
+type PrimitiveSpanProps = PrimitivePropsWithoutRef<typeof Primitive.span>;
 
 //
 type Item = {

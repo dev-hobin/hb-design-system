@@ -1,6 +1,6 @@
 import React, { createContext, ElementRef, forwardRef, useCallback, useId, useMemo } from "react";
 import { useCallbackRef } from "../../hooks/useCallbackRef";
-import { useContollableState } from "../../hooks/useContollableState";
+import { useContollableState } from "../../hooks/useControllableState";
 import { useStrictContext } from "../../hooks/useStrictContext";
 import { composePreventableEventHandlers } from "../../utils/composeEventHandlers";
 import { Primitive, PrimitivePropsWithoutRef } from "../primitive";
