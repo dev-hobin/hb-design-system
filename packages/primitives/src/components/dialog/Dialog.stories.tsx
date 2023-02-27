@@ -14,7 +14,7 @@ export const Default = () => {
         <Dialog.Trigger>모달 열기</Dialog.Trigger>
         <Dialog.Portal>
           {/* <Dialog.Overlay style={{ position: "fixed", inset: 0, backgroundColor: "#00000030" }} /> */}
-          <Dialog.Content
+          <Dialog.Panel
             style={{
               position: "fixed",
               top: "50%",
@@ -35,7 +35,7 @@ export const Default = () => {
               <Dialog.Trigger>모달 열기</Dialog.Trigger>
               <Dialog.Portal>
                 {/* <Dialog.Overlay style={{ position: "fixed", inset: 0, backgroundColor: "#00000030" }} /> */}
-                <Dialog.Content
+                <Dialog.Panel
                   initialFocus={cancelButtonRef}
                   returnFocus={closeButtonRef}
                   style={{
@@ -53,10 +53,10 @@ export const Default = () => {
                   <Dialog.Description>모달 설명</Dialog.Description>
                   <p>다른 컨텐츠 내용들</p>
                   <Dialog.Close ref={cancelButtonRef}>닫기</Dialog.Close>
-                </Dialog.Content>
+                </Dialog.Panel>
               </Dialog.Portal>
             </Dialog>
-          </Dialog.Content>
+          </Dialog.Panel>
         </Dialog.Portal>
       </Dialog>
       <h1>TESTTESTTESTTESTTESTTESTTESTTESTTEST</h1>

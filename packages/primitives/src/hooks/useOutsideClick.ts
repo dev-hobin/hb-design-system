@@ -32,7 +32,8 @@ export const useOutsideClick = (
         initialClickTarget.current = ev.composedPath?.()?.[0] || ev.target;
       }
     },
-    true
+    true,
+    enabledRef.current
   );
 
   useDocumentEvent(
@@ -42,6 +43,7 @@ export const useOutsideClick = (
       handler(ev);
       initialClickTarget.current = null;
     },
-    true
+    true,
+    enabledRef.current
   );
 };

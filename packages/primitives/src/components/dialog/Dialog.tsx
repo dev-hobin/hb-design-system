@@ -145,7 +145,7 @@ interface ContentProps extends PrimitiveDivProps {
   initialFocus?: MutableRefObject<HTMLElement | null>;
   returnFocus?: MutableRefObject<HTMLElement | null>;
 }
-const Content = forwardRef<ContentElement, ContentProps>((props, forwardedRef) => {
+const Panel = forwardRef<ContentElement, ContentProps>((props, forwardedRef) => {
   const { id, forceMount = false, initialFocus, returnFocus, ...rest } = props;
   const internalId = useId();
   const contentId = id || internalId;
@@ -177,7 +177,7 @@ const Content = forwardRef<ContentElement, ContentProps>((props, forwardedRef) =
 
   if (!open && !forceMount) return null;
   return (
-    <FocusTrap asChild enabled={open} loop returnFocus={returnFocus}>
+    <FocusTrap asChild enabled={open} loop initialFocus={initialFocus} returnFocus={returnFocus}>
       <Primitive.div
         id={contentId}
         ref={composedRef}
@@ -192,7 +192,7 @@ const Content = forwardRef<ContentElement, ContentProps>((props, forwardedRef) =
     </FocusTrap>
   );
 });
-Content.displayName = "Dialog.Content";
+Panel.displayName = "Dialog.Content";
 
 type TitleElement = ElementRef<typeof Primitive.h2>;
 type TitleProps = PrimitiveH2Props;
@@ -253,7 +253,7 @@ export const Dialog = Object.assign(Root, {
   Trigger,
   Portal,
   Overlay,
-  Content,
+  Panel,
   Title,
   Description,
   Close,
