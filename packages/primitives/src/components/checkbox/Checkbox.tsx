@@ -12,11 +12,7 @@ import { useControllableState } from "../../hooks/useControllableState";
 import useComposedRef from "../../hooks/useComposedRef";
 import { useStrictContext } from "../../hooks/useStrictContext";
 import { usePreviousValue } from "../../hooks/usePreviousValue";
-import {
-  composeEventHandlers,
-  composePreventableEventHandlers,
-} from "../../utils/composeEventHandlers";
-import { useCallbackRef } from "../../hooks/useCallbackRef";
+import { composeEventHandlers } from "../../utils/composeEventHandlers";
 
 type CheckedState = boolean | "mixed";
 

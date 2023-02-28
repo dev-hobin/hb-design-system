@@ -60,7 +60,7 @@ const Root = forwardRef<RootElement, RootProps>((props, forwardedRef) => {
   } else {
     return (
       <RootContext.Provider value={contextValue}>
-        <MultipleRootImpl ref={forwardedRef} {...props} />;
+        <MultipleRootImpl ref={forwardedRef} {...props} />
       </RootContext.Provider>
     );
   }
@@ -79,6 +79,7 @@ ValueContext.displayName = "ValueContext";
 
 const SingleRootImpl = forwardRef<RootElement, SingleRootProps>((props, forwardedRef) => {
   const {
+    type,
     value: theirValue,
     onValueChange: theirHandler,
     defaultValue,
@@ -112,7 +113,7 @@ const SingleRootImpl = forwardRef<RootElement, SingleRootProps>((props, forwarde
 SingleRootImpl.displayName = "Accordion.Single";
 
 const MultipleRootImpl = forwardRef<RootElement, MultipleRootProps>((props, forwardedRef) => {
-  const { value: theirValue, onValueChange: theirHandler, defaultValue, ...rest } = props;
+  const { type, value: theirValue, onValueChange: theirHandler, defaultValue, ...rest } = props;
   const [value = [], setValue] = useControllableState(theirValue, theirHandler, defaultValue);
 
   const handleItemOpen = useCallback(
@@ -246,13 +247,16 @@ interface PanelProps extends PrimitiveDivProps {
 const Panel = forwardRef<PanelElement, PanelProps>((props, forwardedRef) => {
   const { forceMount = false, ...rest } = props;
 
+  const rootContext = useStrictContext(RootContext);
   const itemContext = useStrictContext(ItemContext);
   const triggerId = itemContext.itemId + "trigger";
   const panelId = itemContext.itemId + "panel";
 
   const isOpen = itemContext.open;
+  const isDisabled = rootContext.disabled || itemContext.disabled;
 
   if (!forceMount && !isOpen) return null;
+  if (!forceMount && isDisabled) return null;
   return (
     <Primitive.div
       ref={forwardedRef}
